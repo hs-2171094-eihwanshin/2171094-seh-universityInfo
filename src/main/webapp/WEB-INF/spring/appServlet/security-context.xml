@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/security https://www.springframework.org/schema/security/spring-security.xsd">
+
+    <!-- DB로 인증하기 -->
+    <security:authentication-manager>
+        <security:authentication-provider>
+            <security:jdbc-user-service data-source-ref="dataSource"
+                                        users-by-username-query="select username, password, enabled from users where username=?"
+                                        authorities-by-username-query="select username, authority from authorities where username=?" />
+        </security:authentication-provider>
+    </security:authentication-manager>
+
+    <security:http auto-config="true" use-expressions="true">
+        <!-- 접근 권한 설정 -->
+        <!-- 메인화면 -->
+        <security:intercept-url pattern="/" access="permitAll()"/>
+        <!-- 로그인 -->
+        <security:intercept-url pattern="/login" access="permitAll()"/>
+        <!-- 로그인 시에만 접근 가능 -->
+        <!-- 학년별 이수 학점 조회 -->
+        <security:intercept-url pattern="/courseinfo" access="hasRole('ROLE_USER')"/>
+        <!-- 학년별 이수 학점 상세보기 조회 -->
+        <security:intercept-url pattern="/courseinfo/*/*" access="hasRole('ROLE_USER')"/>
+        <!-- 수강신청 -->
+        <security:intercept-url pattern="/courseenroll" access="hasRole('ROLE_USER')"/>
+        <!-- 수강신청 정보 조회 -->
+        <security:intercept-url pattern="/courseenrollinfo" access="hasRole('ROLE_USER')"/>
+        <!-- 수강신청시도 경로 -->
+        <security:intercept-url pattern="/doenroll" access="hasRole('ROLE_USER')"/>
+        <!-- 수강신청 성공체크 -->
+        <security:intercept-url pattern="/enrollsucess" access="hasRole('ROLE_USER')"/>
+        <security:intercept-url pattern="/resources/**" access="permitAll()"/>
+        <!-- 나머지 페이지는 모두 접근 불가 -->
+        <security:intercept-url pattern="/**" access="denyAll()"/>
+
+        <!-- 커스텀 로그인 페이지 설정 -->
+        <security:form-login login-page="/login"/>
+
+        <!-- 로그아웃 설정 -->
+        <security:logout/>
+    </security:http>
+</beans>
